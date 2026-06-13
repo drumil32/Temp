@@ -11,6 +11,7 @@
   --display-color: #111827;
   --button-bg: #374151;
   --button-hover: #4b5563;
+  --button-text: #f9fafb;
   --operator-bg: #2563eb;
   --operator-hover: #1d4ed8;
   --function-bg: #7c3aed;
@@ -32,6 +33,7 @@ body.light-mode {
   --display-color: #111827;
   --button-bg: #e5e7eb;
   --button-hover: #d1d5db;
+  --button-text: #111827;
   --operator-bg: #3b82f6;
   --operator-hover: #2563eb;
   --function-bg: #8b5cf6;
@@ -118,16 +120,12 @@ h1 {
   min-height: 54px;
   border: 0;
   border-radius: 14px;
-  color: var(--text-color);
+  color: var(--button-text);
   background: var(--button-bg);
   font-size: 1.05rem;
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.12s ease, background 0.12s ease, color 0.25s ease;
-}
-
-body.light-mode .btn:not(.operator):not(.function):not(.control):not(.equals) {
-  color: #111827;
 }
 
 .btn:hover {
@@ -136,6 +134,13 @@ body.light-mode .btn:not(.operator):not(.function):not(.control):not(.equals) {
 
 .btn:active {
   transform: scale(0.96);
+}
+
+.operator,
+.function,
+.control,
+.equals {
+  color: #f9fafb;
 }
 
 .operator {

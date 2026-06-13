@@ -11,20 +11,33 @@ function updateDisplay(value) {
 }
 
 function setTheme(theme) {
-  const isLight = theme === 'light';
+  const selectedTheme = theme === 'light' ? 'light' : 'dark';
+  const isLight = selectedTheme === 'light';
 
   document.body.classList.toggle('light-mode', isLight);
   themeToggle.textContent = isLight ? '🌙' : '☀️';
   themeToggle.setAttribute('aria-label', isLight ? 'Switch to dark mode' : 'Switch to light mode');
-  localStorage.setItem('calculator-theme', theme);
+  localStorage.setItem('calculator-theme', selectedTheme);
 }
 
-function isOperator(value) {
-  return operators.includes(value);
+function getLastInput() {
+  const match = expression.match(/(\d*\.?\d+|π)$/);
+  return match ? match[0] : '';
+}
+
+function getLastOperator() {
+  if (expression.endsWith('**')) return '**';
+  return ['+', '-', '*', '/', '%'].includes(expression.slice(-1)) ? expression.slice(-1) : '';
+}
+
+function endsWithOperator() {
+  return Boolean(getLastOperator());
 }
 
 function getExpressionValue() {
-  if (!expression) return 0;
+  if (!expression || endsWithOperator()) {
+    throw new Error('Incomplete expression');
+  }
 
   const safeExpression = expression.replace(/π/g, String(Math.PI));
 
@@ -60,23 +73,42 @@ function calculate() {
 }
 
 function appendValue(value) {
-  const lastChar = expression.slice(-1);
-
-  if (shouldResetDisplay && !isOperator(value)) {
+  if (shouldResetDisplay && !operators.includes(value)) {
     expression = '';
     shouldResetDisplay = false;
   }
 
-  if (isOperator(value) && isOperator(lastChar)) {
-    expression = expression.slice(0, -1) + value;
-  } else {
-    expression += value;
+  if (value === '.') {
+    const lastInput = getLastInput();
+
+    if (lastInput.includes('.')) return;
+    expression += lastInput ? '.' : '0.';
+    updateDisplay(expression);
+    return;
   }
 
+  if (operators.includes(value)) {
+    if (!expression && value !== '-') return;
+
+    const lastOperator = getLastOperator();
+    if (lastOperator) {
+      expression = expression.slice(0, -lastOperator.length) + value;
+    } else {
+      expression += value;
+    }
+
+    shouldResetDisplay = false;
+    updateDisplay(expression);
+    return;
+  }
+
+  expression += value;
   updateDisplay(expression);
 }
 
 function runUnaryOperation(operation) {
+  if (!expression) return;
+
   try {
     const value = getExpressionValue();
     let result;
@@ -100,6 +132,9 @@ function runUnaryOperation(operation) {
         result = Math.cos(value * Math.PI / 180);
         break;
       case 'tan':
+        if (Math.abs(Math.cos(value * Math.PI / 180)) < 1e-12) {
+          throw new Error('Invalid tangent');
+        }
         result = Math.tan(value * Math.PI / 180);
         break;
       default:
