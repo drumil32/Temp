@@ -1,0 +1,1 @@
+create one basic calc using html,css and js.
