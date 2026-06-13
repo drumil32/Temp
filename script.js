@@ -1,5 +1,6 @@
 const display = document.getElementById('display');
 const buttons = document.querySelectorAll('.btn');
+const themeToggle = document.getElementById('themeToggle');
 
 let expression = '';
 let shouldResetDisplay = false;
@@ -7,6 +8,15 @@ const operators = ['+', '-', '*', '/', '%', '**'];
 
 function updateDisplay(value) {
   display.value = value || '0';
+}
+
+function setTheme(theme) {
+  const isLight = theme === 'light';
+
+  document.body.classList.toggle('light-mode', isLight);
+  themeToggle.textContent = isLight ? '🌙' : '☀️';
+  themeToggle.setAttribute('aria-label', isLight ? 'Switch to dark mode' : 'Switch to light mode');
+  localStorage.setItem('calculator-theme', theme);
 }
 
 function isOperator(value) {
@@ -110,6 +120,11 @@ function runUnaryOperation(operation) {
   }
 }
 
+themeToggle.addEventListener('click', () => {
+  const nextTheme = document.body.classList.contains('light-mode') ? 'dark' : 'light';
+  setTheme(nextTheme);
+});
+
 buttons.forEach((button) => {
   button.addEventListener('click', () => {
     const { value, action } = button.dataset;
@@ -161,3 +176,5 @@ buttons.forEach((button) => {
     appendValue(value);
   });
 });
+
+setTheme(localStorage.getItem('calculator-theme') || 'dark');
